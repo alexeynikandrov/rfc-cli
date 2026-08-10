@@ -57,6 +57,7 @@ rfc-cli doctor
 |----------|-------------|---------|
 | `RFC_HOME` | Project root directory | Current directory |
 | `EDITOR` | Editor for the `edit` command | — (required for `edit`) |
+| `RFC_VIEWER` | External Markdown renderer for the `view` command (receives content on stdin) | — (raw output to stdout) |
 
 ## Commands
 
@@ -105,6 +106,15 @@ Prints the full RFC content to the terminal. The number can be specified without
 ```sh
 rfc-cli view 1
 # equivalent to: rfc-cli view 0001
+```
+
+If the `RFC_VIEWER` environment variable is set, the content is piped to that program (e.g. a terminal Markdown renderer) instead of being printed raw:
+
+```sh
+export RFC_VIEWER="mdt"
+rfc-cli view 1          # rendered through mdt
+
+rfc-cli view 1 --raw    # force raw Markdown, ignoring RFC_VIEWER
 ```
 
 ### `status <number>` — current status

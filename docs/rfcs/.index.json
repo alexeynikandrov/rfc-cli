@@ -157,14 +157,19 @@
     {
       "number": "0009",
       "title": "RFC-0009: просмотр RFC через внешний рендерер в команде view",
-      "status": "draft",
+      "status": "implemented",
       "dependencies": [
         "RFC-0003"
       ],
       "superseded_by": null,
-      "links": [],
-      "mtime": "1786337548",
-      "content_hash": null
+      "links": [
+        "src/commands/view.rs",
+        "src/cli.rs",
+        "src/main.rs",
+        "tests/integration_test.rs"
+      ],
+      "mtime": "1786338690",
+      "content_hash": "57258823363c37be4463a51b3fe9b4dc23794f457c3f4c80392bc227335574d7"
     }
   ]
 }

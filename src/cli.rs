@@ -33,6 +33,9 @@ pub enum Commands {
     View {
         /// RFC number
         number: String,
+        /// Print raw Markdown to stdout, ignoring RFC_VIEWER
+        #[arg(long)]
+        raw: bool,
     },
     /// Show RFC status
     Status {
