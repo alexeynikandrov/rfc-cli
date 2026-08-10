@@ -27,7 +27,7 @@ fn main() {
         Commands::Init => commands::init::execute(&project_root),
         Commands::New { title } => commands::new::execute(&project_root, &title),
         Commands::List { status } => commands::list::execute(&project_root, status.as_deref()),
-        Commands::View { number } => commands::view::execute(&project_root, &number),
+        Commands::View { number, raw } => commands::view::execute(&project_root, &number, raw),
         Commands::Status { number } => commands::status::execute(&project_root, &number),
         Commands::Edit { number, force } => commands::edit::execute(&project_root, &number, force),
         Commands::Set { number, status, by } => {

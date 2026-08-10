@@ -52,6 +52,17 @@ fn run_rfc_cli_without_editor(project_dir: &Path, args: &[&str]) -> Output {
         .expect("Failed to execute rfc-cli")
 }
 
+// Helper: run rfc-cli with a custom $RFC_VIEWER
+fn run_rfc_cli_with_viewer(project_dir: &Path, args: &[&str], viewer: &str) -> Output {
+    let binary = env!("CARGO_BIN_EXE_rfc-cli");
+    std::process::Command::new(binary)
+        .args(args)
+        .env("RFC_HOME", project_dir.as_os_str())
+        .env("RFC_VIEWER", viewer)
+        .output()
+        .expect("Failed to execute rfc-cli")
+}
+
 // Helper: write an RFC file with given status AND update the index entry
 fn write_rfc_with_status(dir: &Path, number: &str, title: &str, status: &str) {
     let content = format!(
@@ -776,6 +787,74 @@ fn test_view_invalid_number() {
     assert!(
         stderr.contains("Invalid RFC number"),
         "should report invalid number, got: {}",
+        stderr
+    );
+
+    cleanup(&dir);
+}
+
+#[test]
+fn test_view_uses_rfc_viewer() {
+    let dir = create_temp_dir("view_viewer");
+
+    run_rfc_cli(&dir, &["init"]);
+    run_rfc_cli(&dir, &["new", "rendered RFC"]);
+
+    // `cat` acts as a trivial viewer: it echoes stdin to stdout
+    let output = run_rfc_cli_with_viewer(&dir, &["view", "1"], "cat");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    assert!(output.status.success());
+    assert!(
+        stdout.contains("RFC-0001: rendered RFC"),
+        "viewer should receive and emit RFC content, got: {}",
+        stdout
+    );
+
+    cleanup(&dir);
+}
+
+#[test]
+fn test_view_raw_ignores_rfc_viewer() {
+    let dir = create_temp_dir("view_raw");
+
+    run_rfc_cli(&dir, &["init"]);
+    run_rfc_cli(&dir, &["new", "raw RFC"]);
+
+    // Even with RFC_VIEWER set, --raw must print the raw Markdown to stdout.
+    // Use a viewer that would produce different output if invoked.
+    let output = run_rfc_cli_with_viewer(&dir, &["view", "1", "--raw"], "true");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    assert!(output.status.success());
+    assert!(
+        stdout.contains("RFC-0001: raw RFC"),
+        "--raw should print raw content regardless of RFC_VIEWER, got: {}",
+        stdout
+    );
+    assert!(
+        stdout.contains("## Problem"),
+        "--raw should print full Markdown, got: {}",
+        stdout
+    );
+
+    cleanup(&dir);
+}
+
+#[test]
+fn test_view_viewer_launch_failure() {
+    let dir = create_temp_dir("view_viewer_fail");
+
+    run_rfc_cli(&dir, &["init"]);
+    run_rfc_cli(&dir, &["new", "viewer fail RFC"]);
+
+    let output = run_rfc_cli_with_viewer(&dir, &["view", "1"], "definitely_not_a_real_program_xyz");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(!output.status.success());
+    assert!(
+        stderr.contains("Failed to launch viewer"),
+        "should report viewer launch failure, got: {}",
         stderr
     );
 
