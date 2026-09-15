@@ -31,13 +31,7 @@ pub fn execute(project_root: &Path, status_filter: Option<&str>) -> Result<(), S
         .max(6);
 
     // Print header
-    println!(
-        " {:<6} {:<width$} {}",
-        "#",
-        "Status",
-        "Title",
-        width = max_status
-    );
+    println!(" {:<6} {:<width$} Title", "#", "Status", width = max_status);
 
     // Print rows
     for entry in &rfcs {

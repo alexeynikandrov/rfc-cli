@@ -5,6 +5,12 @@
         "mcp"
       ],
       "command": "mem-cli"
+    },
+    "rfc-cli": {
+      "args": [
+        "mcp"
+      ],
+      "command": "rfc-cli"
     }
   }
 }

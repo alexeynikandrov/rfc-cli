@@ -23,6 +23,13 @@ cargo build --release
 cp target/release/rfc-cli ~/.local/bin/
 ```
 
+Проверить установленную версию:
+
+```sh
+rfc-cli --version
+# rfc-cli 0.1.7
+```
+
 ## Быстрый старт
 
 ```sh
@@ -274,6 +281,36 @@ RFC-0005 (logging):
 Summary: 3 error(s), 1 warning(s) across 2 RFC(s).
 ```
 
+### `mcp` — MCP-сервер
+
+Запускает read-only Model Context Protocol сервер через `stdio`. Сервер
+поддерживает JSON-RPC 2.0 и предоставляет MCP-клиентам (например, Copilot или
+Claude Desktop) инструменты:
+
+- `list_rfcs`
+- `view_rfc`
+- `get_rfc_status`
+- `get_rfc_dependencies`
+- `ping`
+
+```sh
+rfc-cli mcp
+```
+
+Команда `rfc-cli init` добавляет запись `rfc-cli` в `.mcp.json`, сохраняя другие
+настроенные серверы:
+
+```json
+{
+  "mcpServers": {
+    "rfc-cli": {
+      "command": "rfc-cli",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
 ### `reindex` — пересборка индекса
 
 Полностью перестраивает `.index.json` из RFC-файлов на диске. Используйте, если индекс повреждён или рассинхронизирован.
@@ -299,6 +336,7 @@ rfc-cli reindex
 | `deps <N> [--reverse]` | Дерево зависимостей |
 | `check [N]` | Валидация формата |
 | `doctor [--stale-days N]` | Диагностика здоровья |
+| `mcp` | Read-only MCP-сервер через stdio |
 | `reindex` | Пересборка индекса |
 
 ## RFC-процесс
@@ -399,6 +437,7 @@ src/
 │   ├── deps.rs          # rfc-cli deps
 │   ├── check.rs         # rfc-cli check
 │   ├── doctor.rs        # rfc-cli doctor
+│   ├── mcp.rs           # rfc-cli mcp
 │   └── reindex.rs       # rfc-cli reindex
 └── rfclib/
     ├── mod.rs
@@ -416,7 +455,8 @@ docs/rfcs/
 ├── 0003.md              # RFC-0003: реализация команд list, view, status и edit
 ├── 0004.md              # RFC-0004: реализация команд set, check и reindex
 ├── 0005.md              # RFC-0005: реализация команд link, unlink и deps
-└── 0006.md              # RFC-0006: реализация команды doctor
+├── 0006.md              # RFC-0006: реализация команды doctor
+└── 0010.md              # RFC-0010: MCP-сервер для инструментов RFC
 ```
 
 ## Лицензия
