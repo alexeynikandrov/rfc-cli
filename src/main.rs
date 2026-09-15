@@ -52,6 +52,7 @@ fn main() {
         Commands::Doctor { stale_days, drift } => {
             commands::doctor::execute(&project_root, stale_days, drift)
         }
+        Commands::Mcp => commands::mcp::execute(&project_root),
     };
 
     if let Err(e) = result {

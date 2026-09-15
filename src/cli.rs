@@ -111,4 +111,6 @@ pub enum Commands {
         #[arg(long, value_enum, default_value = "git")]
         drift: DriftStrategy,
     },
+    /// Run MCP server over stdio
+    Mcp,
 }

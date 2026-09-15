@@ -5,6 +5,7 @@ pub mod edit;
 pub mod init;
 pub mod link;
 pub mod list;
+pub mod mcp;
 pub mod new;
 pub mod reindex;
 pub mod set;

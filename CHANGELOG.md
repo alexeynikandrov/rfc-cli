@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6]
+
+### Added
+- Read-only MCP server via `rfc-cli mcp` over stdio with RFC tools for listing,
+  viewing, checking status, and inspecting dependencies.
+- Automatic `rfc-cli` MCP server configuration in `.mcp.json`, preserving other
+  configured servers.
+
 ## [0.1.5]
 
 ### Fixed
