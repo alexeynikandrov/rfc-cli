@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Output;
@@ -50,6 +51,31 @@ fn run_rfc_cli_without_editor(project_dir: &Path, args: &[&str]) -> Output {
         .env_remove("EDITOR")
         .output()
         .expect("Failed to execute rfc-cli")
+}
+
+// Helper: run the MCP server with newline-delimited JSON input
+fn run_rfc_cli_mcp(project_dir: &Path, input: &str) -> Output {
+    let binary = env!("CARGO_BIN_EXE_rfc-cli");
+    let mut child = std::process::Command::new(binary)
+        .arg("mcp")
+        .env("RFC_HOME", project_dir.as_os_str())
+        .env_remove("RFC_VIEWER")
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .expect("Failed to execute rfc-cli mcp");
+
+    child
+        .stdin
+        .take()
+        .expect("MCP stdin should be available")
+        .write_all(input.as_bytes())
+        .expect("Failed to write MCP input");
+
+    child
+        .wait_with_output()
+        .expect("Failed to wait for rfc-cli mcp")
 }
 
 // Helper: run rfc-cli with a custom $RFC_VIEWER
@@ -211,6 +237,10 @@ fn test_init_creates_directory_and_index() {
     let index_content = fs::read_to_string(&index_path).unwrap();
     let parsed: serde_json::Value = serde_json::from_str(&index_content).unwrap();
     assert_eq!(parsed["rfcs"], serde_json::json!([]));
+    let mcp_config: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(dir.join(".mcp.json")).unwrap()).unwrap();
+    assert_eq!(mcp_config["mcpServers"]["rfc-cli"]["command"], "rfc-cli");
+    assert_eq!(mcp_config["mcpServers"]["rfc-cli"]["args"][0], "mcp");
 
     assert!(
         stdout.contains("Created"),
@@ -257,6 +287,26 @@ fn test_init_creates_nested_docs_directory() {
         dir.join("docs/rfcs").exists(),
         "docs/rfcs/ should be created"
     );
+
+    cleanup(&dir);
+}
+
+#[test]
+fn test_init_preserves_existing_mcp_servers() {
+    let dir = create_temp_dir("init_mcp_merge");
+    fs::write(
+        dir.join(".mcp.json"),
+        r#"{"mcpServers":{"mem-cli":{"command":"mem-cli","args":["mcp"]}}}"#,
+    )
+    .unwrap();
+
+    let output = run_rfc_cli(&dir, &["init"]);
+    assert!(output.status.success());
+
+    let config: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(dir.join(".mcp.json")).unwrap()).unwrap();
+    assert_eq!(config["mcpServers"]["mem-cli"]["command"], "mem-cli");
+    assert_eq!(config["mcpServers"]["rfc-cli"]["args"][0], "mcp");
 
     cleanup(&dir);
 }
@@ -1731,6 +1781,38 @@ fn test_help_shows_new_commands() {
     assert!(stdout.contains("link"), "help should mention link");
     assert!(stdout.contains("unlink"), "help should mention unlink");
     assert!(stdout.contains("deps"), "help should mention deps");
+    assert!(stdout.contains("mcp"), "help should mention mcp");
+
+    cleanup(&dir);
+}
+
+#[test]
+fn test_mcp_initialize_and_list_rfcs() {
+    let dir = create_temp_dir("mcp_list");
+    run_rfc_cli(&dir, &["init"]);
+    run_rfc_cli(&dir, &["new", "MCP RFC"]);
+
+    let input = concat!(
+        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}\n",
+        "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}\n",
+        "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":",
+        "{\"name\":\"list_rfcs\",\"arguments\":{}}}\n"
+    );
+    let output = run_rfc_cli_mcp(&dir, input);
+    assert!(output.status.success());
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let responses = stdout
+        .lines()
+        .map(|line| serde_json::from_str::<serde_json::Value>(line).unwrap())
+        .collect::<Vec<_>>();
+
+    assert_eq!(responses.len(), 2);
+    assert_eq!(responses[0]["result"]["serverInfo"]["name"], "rfc-cli");
+    assert_eq!(
+        responses[1]["result"]["structuredContent"]["rfcs"][0]["number"],
+        "0001"
+    );
 
     cleanup(&dir);
 }

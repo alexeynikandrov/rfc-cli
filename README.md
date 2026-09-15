@@ -282,6 +282,36 @@ RFC-0005 (logging):
 Summary: 3 error(s), 1 warning(s) across 2 RFC(s).
 ```
 
+### `mcp` — MCP server
+
+Runs a read-only Model Context Protocol server over `stdio`. The server supports
+JSON-RPC 2.0 and exposes RFC tools for MCP clients such as Copilot or Claude
+Desktop:
+
+- `list_rfcs`
+- `view_rfc`
+- `get_rfc_status`
+- `get_rfc_dependencies`
+- `ping`
+
+```sh
+rfc-cli mcp
+```
+
+`rfc-cli init` adds the following entry to `.mcp.json` while preserving other
+configured servers:
+
+```json
+{
+  "mcpServers": {
+    "rfc-cli": {
+      "command": "rfc-cli",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
 ### `reindex` — rebuild index
 
 Completely rebuilds `.index.json` from the RFC files on disk. Use when the index is corrupted or out of sync.
@@ -307,6 +337,7 @@ rfc-cli reindex
 | `deps <N> [--reverse]` | Dependency tree |
 | `check [N]` | Format validation |
 | `doctor [--stale-days N]` | Health diagnostics |
+| `mcp` | Run read-only MCP server over stdio |
 | `reindex` | Rebuild index |
 
 ## RFC Process
@@ -407,6 +438,7 @@ src/
 │   ├── deps.rs          # rfc-cli deps
 │   ├── check.rs         # rfc-cli check
 │   ├── doctor.rs        # rfc-cli doctor
+│   ├── mcp.rs           # rfc-cli mcp
 │   └── reindex.rs       # rfc-cli reindex
 └── rfclib/
     ├── mod.rs
@@ -424,7 +456,8 @@ docs/rfcs/
 ├── 0003.md              # RFC-0003: implement list, view, status, edit commands
 ├── 0004.md              # RFC-0004: implement set, check, reindex commands
 ├── 0005.md              # RFC-0005: implement link, unlink, deps commands
-└── 0006.md              # RFC-0006: implement doctor command
+├── 0006.md              # RFC-0006: implement doctor command
+└── 0010.md              # RFC-0010: MCP server for RFC tools
 ```
 
 ## License

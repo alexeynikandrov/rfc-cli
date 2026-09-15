@@ -16,4 +16,5 @@ test: ## Run all tests
 clean: ## Remove build artifacts
 	cargo clean
 
-install: release ## Install binary to ~/.cargo
+install: release ## Install binary to ~/.local/bin
+	install -Dm755 target/release/rfc-cli ~/.local/bin/rfc-cli
