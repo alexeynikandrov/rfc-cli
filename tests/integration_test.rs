@@ -1787,6 +1787,28 @@ fn test_help_shows_new_commands() {
 }
 
 #[test]
+fn test_version_flags_show_package_version() {
+    let dir = create_temp_dir("version_flags");
+
+    let long_output = run_rfc_cli(&dir, &["--version"]);
+    let short_output = run_rfc_cli(&dir, &["-V"]);
+    let expected = format!("rfc-cli {}", env!("CARGO_PKG_VERSION"));
+
+    assert!(long_output.status.success());
+    assert!(short_output.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&long_output.stdout).trim(),
+        expected
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&short_output.stdout).trim(),
+        expected
+    );
+
+    cleanup(&dir);
+}
+
+#[test]
 fn test_mcp_initialize_and_list_rfcs() {
     let dir = create_temp_dir("mcp_list");
     run_rfc_cli(&dir, &["init"]);

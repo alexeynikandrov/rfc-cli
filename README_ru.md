@@ -23,6 +23,13 @@ cargo build --release
 cp target/release/rfc-cli ~/.local/bin/
 ```
 
+Проверить установленную версию:
+
+```sh
+rfc-cli --version
+# rfc-cli 0.1.7
+```
+
 ## Быстрый старт
 
 ```sh

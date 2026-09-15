@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
 
 #[derive(Parser)]
-#[command(name = "rfc-cli", about = "Manage RFC documents")]
+#[command(name = "rfc-cli", about = "Manage RFC documents", version)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
