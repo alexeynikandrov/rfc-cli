@@ -184,8 +184,21 @@
         "src/main.rs",
         "tests/integration_test.rs"
       ],
-      "mtime": "1789459953",
+      "mtime": "1789459989",
       "content_hash": "5ed22f940a64026b804fc74469b6608298628c8d0f26acbb97863b54a8dcdfea"
+    },
+    {
+      "number": "0011",
+      "title": "RFC-0011: вывод версии CLI",
+      "status": "implemented",
+      "dependencies": [],
+      "superseded_by": null,
+      "links": [
+        "src/cli.rs",
+        "tests/integration_test.rs"
+      ],
+      "mtime": "1789460268",
+      "content_hash": "311a7361030a9843a64bb74332cc1a816896dbb1e70add77a5e992ec7a4fce75"
     }
   ]
 }

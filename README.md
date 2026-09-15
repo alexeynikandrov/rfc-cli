@@ -23,6 +23,13 @@ For convenience, you can copy it to your PATH:
 cp target/release/rfc-cli ~/.local/bin/
 ```
 
+Check the installed version:
+
+```sh
+rfc-cli --version
+# rfc-cli 0.1.7
+```
+
 ## Shell Completion
 
 Generate and install completion scripts:
